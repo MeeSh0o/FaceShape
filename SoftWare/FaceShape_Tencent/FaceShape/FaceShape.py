@@ -31,7 +31,7 @@ def GetFaceShapeJson(path):
     if rsp_loads['ret'] == 0:
         #print (json.dumps(rsp_loads, encoding="UTF-8", ensure_ascii=False, sort_keys=False, indent=4))
         #print ('----------------------API SUCC----------------------')
-        print "SUCC\n"
+        print ("Get FaceShapeData SUCC!\n")
         with open(file_name, 'w') as file_obj:
             json.dump(rsp_loads, file_obj)
             print("Write Down Json File!")

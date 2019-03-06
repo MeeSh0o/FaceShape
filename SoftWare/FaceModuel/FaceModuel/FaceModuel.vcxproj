@@ -72,15 +72,15 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>F:\CJsonObject-master\;C:\Python27amd64\include;F:\OpenCV\opencv\build\include;F:\OpenCV\opencv\build\include\opencv;F:\OpenCV\opencv\build\include\opencv2;$(IncludePath)</IncludePath>
+    <IncludePath>F:\Graduation Project\SoftWare\FaceModuel\FaceModuel\include;C:\Python27amd64\include;F:\OpenCV\opencv\build\include;F:\OpenCV\opencv\build\include\opencv;F:\OpenCV\opencv\build\include\opencv2;$(IncludePath)</IncludePath>
     <ReferencePath>C:\Python27amd64\libs;$(ReferencePath)</ReferencePath>
-    <LibraryPath>C:\Python27amd64\libs;F:\OpenCV\opencv\build\x64\vc15\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>F:\Graduation Project\SoftWare\FaceModuel\FaceModuel\lib;C:\Python27amd64\libs;F:\OpenCV\opencv\build\x64\vc15\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>F:\CJsonObject-master\;C:\Python27amd64\include;F:\OpenCV\opencv\build\include;F:\OpenCV\opencv\build\include\opencv;F:\OpenCV\opencv\build\include\opencv2;$(IncludePath)</IncludePath>
+    <IncludePath>F:\Graduation Project\SoftWare\FaceModuel\FaceModuel\include;C:\Python27amd64\include;F:\OpenCV\opencv\build\include;F:\OpenCV\opencv\build\include\opencv;F:\OpenCV\opencv\build\include\opencv2;$(IncludePath)</IncludePath>
     <ReferencePath>C:\Python27amd64\libs;$(ReferencePath)</ReferencePath>
-    <LibraryPath>C:\Python27amd64\libs;F:\OpenCV\opencv\build\x64\vc15\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>F:\Graduation Project\SoftWare\FaceModuel\FaceModuel\lib;C:\Python27amd64\libs;F:\OpenCV\opencv\build\x64\vc15\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
