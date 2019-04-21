@@ -26,5 +26,8 @@
     <ClCompile Include="FaceModuel.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="TDRestruntionFeature.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
