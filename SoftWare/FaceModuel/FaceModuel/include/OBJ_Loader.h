@@ -68,6 +68,11 @@ namespace objl
 		{
 			return Vector2(this->X *other, this->Y * other);
 		}
+		double magnitude()
+		{
+			double value = sqrt(X * X + Y * Y);
+			return value;
+		}
 
 		// Positional Variables
 		float X;
@@ -122,6 +127,11 @@ namespace objl
 		Vector3 operator/(const float& other) const
 		{
 			return Vector3(this->X / other, this->Y / other, this->Z / other);
+		}
+		double magnitude() 
+		{
+			double value = sqrt(X * X + Y * Y + Z * Z);
+			return value;
 		}
 
 		// Positional Variables

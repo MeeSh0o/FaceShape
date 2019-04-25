@@ -11,129 +11,8 @@
 using namespace std;
 using namespace cv;
 
+/*数据结构声明*/
 
-string path = "F:\\Graduation Project\\SoftWare\\FaceShape_Tencent\\FaceShape";
-string ImagePath = "F:\\Graduation Project\\SoftWare\\FaceModuel\\FaceModuel\\Images\\";
-string chdir_cmd = string("sys.path.append(\"") + path + "\")";
-string candide_3_path = "F:\\Graduation Project\\Faces\\Candide-3.obj";
-string TreeDRestruntion_path = "F:\\Graduation Project\\Faces\\3D Restruntion.obj";
-const char* cstr_cmd = chdir_cmd.c_str();
-
-namespace TDRF {
-	int face_profile_Indices[30]
-	{
-		817,0,
-		827,2,
-		805,4,
-		789,5,
-		783,6,
-		139,8,
-		140,9,
-		51,10,
-		23,11,
-		13,12,
-		2,14,
-		777,15,
-		455,16,
-		629,18,
-		622,20
-	};
-	int left_eye_Indices[8]
-	{
-		292,0,
-		277,2,
-		271,4,
-		287,6
-	};
-	int right_eye_Indices[8]
-	{
-		651,0,
-		672,2,
-		727,4,
-		665,6
-	};
-	int left_eyebrow_Indices[16]
-	{
-		276,0,
-		237,1,
-		303,3,
-		305,4,
-		313,5,
-		228,6,
-		239,7
-	};
-	int right_eyebrow_Indices[16]
-	{
-		732,0,
-		835,1,
-		636,3,
-		632,4,
-		642,5,
-		643,6,
-		836,7
-	};
-	int mouth_Indices[28]
-	{
-		70,0,
-		85,2,
-		101,3,
-		189,4,
-		176,6,
-		510,7,
-		490,9,
-		470,11,
-		203,13,
-		200,14,
-		197,15,
-		500,18,
-		496,19,
-		489,20
-	};
-	int nose_Indices[26]
-	{
-		350,0,
-		312,1,
-		319,2,
-		320,3,
-		394,4,
-		388,5,
-		357,6,
-		365,7,
-		537,8,
-		558,9,
-		562,10,
-		575,11,
-		832,12
-	};
-}
-
-//class Pnt {
-//public:
-//	int X;
-//	int Y;
-//};
-//class FaceShapeList {
-//public:
-//	Pnt face_profile[21];
-//	Pnt left_eye[8];
-//	Pnt left_eyebrow[8];
-//	Pnt right_eye[8];
-//	Pnt mouth[22];
-//	Pnt nose[13];
-//	Pnt right_eyebrow[8];
-//};
-//class Data {
-//public:
-//	int image_height;
-//	int image_width;
-//	FaceShapeList face_shape_list[1];
-//};
-//class FaceShapeData {
-//public:
-//	string msg;
-//	Data data;
-//	int ret;
-//};
 class FaceShapeList {
 public:
 	objl::Vector2 face_profile[21];
@@ -156,6 +35,28 @@ public:
 	Data data;
 	int ret;
 };
+// 储存模型坐标点和特征点及其索引
+class Verticle
+{		 
+	public :
+		// 构造函数
+		Verticle();
+		// 带参数的构造函数
+		Verticle(objl::Vector3 _Position, unsigned int _Indice, objl::Vector2 _Feature, unsigned int _FIndice);
+		~Verticle();
+		// 点坐标
+		objl::Vector3 Position;
+		// 点在模型中的索引号
+		unsigned int Indice;
+		// 特征点到鼻尖点的正面位移量
+		objl::Vector2 Feature;
+		// 特征点在特征数据中的索引号
+		unsigned int FIndice;
+
+};
+
+
+/*函数声明*/
 
 // 读取json的int格式数据
 int Json_ReadInt(Json::Value JV, int ori_value = 0);
@@ -172,35 +73,182 @@ void ShowImage(string path, FaceShapeData data);
 // 读取Obj格式模型演示方法
 void LoadObjTest(string path, string out);
 // 读取Obj格式模型方法及其算法调用
-void LoadObj(string path, string out);
-// 比对Vector3和Vector2，返回最相近的点的索引值
-std::vector<int> GetNearestPosionsIndex(std::vector <objl::Vector3> vector3, FaceShapeData faceShapeData);
-// 获取重建目标特征点的位置
-void TargetFeature(std::vector <objl::Vector3> Positions, std::vector<objl::Mesh> Meshes);
+void LoadObj(string path);
+// 标准模型特征点初始化
+void FeatureVerticlesInitiate(std::vector <objl::Vector3> positions);
+// 目标特征点顶点集
+std::vector<Verticle> FeatureOut(FaceShapeData faceShapeData);
 // 径向基函数
-void RadialBasisFunction();
+void RadialBasisFunction(std::vector<Verticle> FeatureData);
 
+
+/*变量声明*/
+
+// 标准模型的点坐标
+std::vector <objl::Vector3> StandardModelPositions;
+// 目标模型的点坐标中间变量
+std::vector <objl::Vector3> OutModelPositions;
+// 标准模型的面
+std::vector <objl::Vector3> StandardModelFaces;
+
+int face_profile_Indices[30]
+{
+	817,0,
+	827,2,
+	805,4,
+	789,5,
+	783,6,
+	139,8,
+	140,9,
+	51,10,
+	23,11,
+	13,12,
+	2,14,
+	777,15,
+	455,16,
+	629,18,
+	622,20
+};
+int left_eye_Indices[8]
+{
+	292,0,
+	277,2,
+	271,4,
+	287,6
+};
+int right_eye_Indices[8]
+{
+	651,0,
+	672,2,
+	727,4,
+	665,6
+};
+int left_eyebrow_Indices[14]
+{
+	276,0,
+	237,1,
+	303,3,
+	305,4,
+	313,5,
+	228,6,
+	239,7
+};
+int right_eyebrow_Indices[14]
+{
+	732,0,
+	835,1,
+	636,3,
+	632,4,
+	642,5,
+	643,6,
+	836,7
+};
+int mouth_Indices[28]
+{
+	70,0,
+	85,2,
+	101,3,
+	189,4,
+	176,6,
+	510,7,
+	490,9,
+	470,11,
+	203,13,
+	200,14,
+	197,15,
+	500,18,
+	496,19,
+	489,20
+};
+int nose_Indices[26]
+{
+	350,0,
+	312,1,
+	319,2,
+	320,3,
+	394,4,
+	388,5,
+	357,6,
+	365,7,
+	537,8,
+	558,9,
+	562,10,
+	575,11,
+	832,12
+};
+
+// 标准模型的特征点顶点数据
+Verticle Face_profile_Indices[15];
+Verticle Left_eye_Indices[4];
+Verticle Right_eye_Indices[4];
+Verticle Left_eyebrow_Indices[7];
+Verticle Right_eyebrow_Indices[7];
+Verticle Mouth_Indices[14];
+Verticle Nose_Indices[13];
+std::vector<Verticle> StandardFeaturePosiotons;
+
+string path = "F:\\Graduation Project\\SoftWare\\FaceShape_Tencent\\FaceShape";
+string ImagePath = "F:\\Graduation Project\\SoftWare\\FaceModuel\\FaceModuel\\Images\\";
+string chdir_cmd = string("sys.path.append(\"") + path + "\")";
+string candide_3_path = "F:\\Graduation Project\\Faces\\Candide-3.obj";
+string TreeDRestruntion_path = "F:\\Graduation Project\\Faces\\3D Restruntion.obj";
+const char* cstr_cmd = chdir_cmd.c_str();
+
+float Zchange = 0; // 模型整体形变系数，控制Z轴坐标变化
+
+double R = 80;
+
+/*主函数*/
 
 int main()
 {
-	//string fileName; // 文件名
-	//cout << "输入文件名：" << endl;
-	//cin >> fileName;
+	LoadObj(TreeDRestruntion_path); // 初始化标准模型数据
+	
+	string fileName; // 文件名
+	cout << "输入文件名：" << endl;
+	cin >> fileName;
 
-	//string fullPath = ImagePath + fileName;
+	string fullPath = ImagePath + fileName;
 
-	//const char* path = fullPath.c_str();
-	//char* path_char = new char[99];
-	//path_char = const_cast<char*>(path);
+	const char* path = fullPath.c_str();
+	char* path_char = new char[99];
+	path_char = const_cast<char*>(path);
 
-	//string data_str = FaceShape_Python(path_char); // str格式的json数据
+	string data_str = FaceShape_Python(path_char); // str格式的json数据
 
-	//FaceShapeData faceShapeData = Json2Class(data_str); // FaceShapeData数据
+	FaceShapeData faceShapeData = Json2Class(data_str); // FaceShapeData数据
 
-	//ShowImage(path_char, faceShapeData); // 下一步：ShowImage，传入faceShapeData，输出图像并标点
+	//ShowImage(path_char, faceShapeData); // 传入faceShapeData，输出图像并标点
 
-	LoadObj(TreeDRestruntion_path, "F:\\Graduation Project\\Faces\\TestOut.obj");
+	std::vector<Verticle> FeatureData = FeatureOut(faceShapeData); // 获得目标模型的特征点的模型顶点数据
+
+	cout << FeatureData.size() << endl;
+	// 用径向基函数计算模型每个点的位置
+
+	RadialBasisFunction(FeatureData);
 }
+
+
+/*数据结构定义*/
+
+Verticle::Verticle(void)
+{
+	Position = objl::Vector3();
+	Indice = 0;
+	Feature = objl::Vector2();
+	FIndice = 0;
+}
+Verticle::Verticle(objl::Vector3 _Position, unsigned int _Indice, objl::Vector2 _Feature, unsigned int _FIndice) 
+{
+	Position = _Position;
+	Indice = _Indice;
+	Feature = _Feature;
+	FIndice = _FIndice;
+}
+Verticle::~Verticle() {}
+
+
+/*函数定义*/
 
 string FaceShape_Python(char* image)
 {
@@ -250,6 +298,7 @@ string FaceShape_Python(char* image)
 	Py_Finalize();;
 	return callBack3;
 };
+
 FaceShapeData Json2Class(string data)
 {
 	//char jsonData[3000];
@@ -355,6 +404,7 @@ FaceShapeData Json2Class(string data)
 
 	return faceShapeData;
 }
+
 void ShowImage(string path, FaceShapeData data)
 {
 	Mat read = imread(path);//实例化一个Mat对象,这里使用的是局部路径，图片和工程文件放在同一目录（不是输出文件的目录）
@@ -410,6 +460,7 @@ void ShowImage(string path, FaceShapeData data)
 	waitKey(0);
 	return;
 }
+
 int Json_ReadInt(Json::Value JV, int ori_value)
 {
 	int result = ori_value;
@@ -418,6 +469,7 @@ int Json_ReadInt(Json::Value JV, int ori_value)
 		result = JV.asInt();
 	return result;
 }
+
 double Json_ReadDouble(Json::Value JV, double ori_value)
 {
 	double result = ori_value;
@@ -426,6 +478,7 @@ double Json_ReadDouble(Json::Value JV, double ori_value)
 		result = JV.asDouble();
 	return result;
 }
+
 string Json_ReadString(Json::Value JV, string ori_value)
 {
 	string result = ori_value;
@@ -434,6 +487,7 @@ string Json_ReadString(Json::Value JV, string ori_value)
 		result = JV.asCString();
 	return result;
 }
+
 void LoadObjTest(string path, string out)
 {
 	// 初始化 Loader
@@ -517,7 +571,8 @@ void LoadObjTest(string path, string out)
 		file.close();
 	}
 }
-void LoadObj(string path, string out) 
+
+void LoadObj(string path)
 {
 	// 初始化 Loader
 	objl::Loader Loader;
@@ -534,47 +589,244 @@ void LoadObj(string path, string out)
 		//for (int i = 0; i < Loader.LoadedVertices.size(); i++) {
 		//	cout << Loader.LoadedVertices[i].Position.X << "," << Loader.LoadedVertices[i].Position.Y << "," << Loader.LoadedVertices[i].Position.Z << "\n";
 		//}
+		cout << "标准模型读取成功" << endl;
 
-		std::vector <objl::Vector3> Positions(Loader.PointsPositions.size());
 		std::vector <objl::Vector3> Faces(Loader.Faces.size());
-
 		for (int i = 0; i < Loader.PointsPositions.size(); i++)
 		{
-			Positions[i] = Loader.PointsPositions[i];
+			StandardModelPositions.push_back(Loader.PointsPositions[i]);
+			OutModelPositions.push_back(Loader.PointsPositions[i]);
 		}
 		for (int i = 0; i < Loader.Faces.size(); i++)
 		{
-			Faces[i] = Loader.Faces[i];
+			StandardModelFaces.push_back(Loader.Faces[i]);
 		}
+		// 初始化标注模型特征点数据
+		FeatureVerticlesInitiate(StandardModelPositions);
 
-
-
-
-		/* 
+		cout << "标准模型数据初始化完成" << endl;
+		/*
 		* 整一个向量来存所有顶点坐标
 		* 找出所有顶点中对应的特征点Pi（如果没有特征点？-1找个最近的 -2创建一个新的）及对应的索引值
 		* 求出特征点位移之后的位置P'i
 		* 应用径向基函数求剩余所有点的值P'i
 		*/
 	}
-	// 如果读取失败，则提示
-	else
+	else 
 	{
-		// 打开输出文档
-		std::ofstream file(out);
-
-		// 输出错误
-		file << "Failed to Load File. May have failed to find it or it was not an .obj file.\n";
-
-		// 关闭文档
-		file.close();
+		cout << "标准模型读取失败" << endl;
 	}
-
-}void TargetFeature(std::vector <objl::Vector3> Positions, std::vector<objl::Mesh> Meshes) {
-
 }
 
-void RadialBasisFunction() 
+void FeatureVerticlesInitiate(std::vector <objl::Vector3> positions)
 {
+	// 选取鼻尖作为特征点参考点
+	objl::Vector2 NoseFeature(positions[nose_Indices[0]].X, positions[nose_Indices[0]].Y);
 
+	for (int i = 0; i < sizeof(Face_profile_Indices) / sizeof(Face_profile_Indices[0]); i++)
+	{
+		unsigned int Indice = face_profile_Indices[2 * i];
+		objl::Vector3 Position = positions[Indice];
+		unsigned int FIndice = face_profile_Indices[2 * i + 1];
+		objl::Vector2 Feature = objl::Vector2(Position.X, Position.Y) - NoseFeature;
+		Face_profile_Indices[i] = Verticle(Position, Indice, Feature, FIndice);
+		StandardFeaturePosiotons.push_back(Face_profile_Indices[i]);
+	}
+	for (int i = 0; i < sizeof(Left_eye_Indices) / sizeof(Left_eye_Indices[0]); i++)
+	{
+
+		unsigned int Indice = left_eye_Indices[2 * i];
+		objl::Vector3 Position = positions[Indice];
+		unsigned int FIndice = left_eye_Indices[2 * i + 1];
+		objl::Vector2 Feature = objl::Vector2(Position.X, Position.Y) - NoseFeature;
+		Left_eye_Indices[i] = Verticle(Position, Indice, Feature, FIndice);
+		StandardFeaturePosiotons.push_back(Left_eye_Indices[i]);
+	}	
+	for (int i = 0; i < sizeof(Right_eye_Indices) / sizeof(Right_eye_Indices[0]); i++)
+	{
+		unsigned int Indice = right_eye_Indices[2 * i];
+		objl::Vector3 Position = positions[Indice];
+		unsigned int FIndice = right_eye_Indices[2 * i + 1];
+		objl::Vector2 Feature = objl::Vector2(Position.X, Position.Y) - NoseFeature;
+		Right_eye_Indices[i] = Verticle(Position, Indice, Feature, FIndice);
+		StandardFeaturePosiotons.push_back(Right_eye_Indices[i]);
+	}	
+	for (int i = 0; i < sizeof(Left_eyebrow_Indices) / sizeof(Left_eyebrow_Indices[0]); i++)
+	{
+		unsigned int Indice = left_eyebrow_Indices[2 * i];
+		objl::Vector3 Position = positions[Indice];
+		unsigned int FIndice = left_eyebrow_Indices[2 * i + 1];
+		objl::Vector2 Feature = objl::Vector2(Position.X, Position.Y) - NoseFeature;
+		Left_eyebrow_Indices[i] = Verticle(Position, Indice, Feature, FIndice);
+		StandardFeaturePosiotons.push_back(Left_eyebrow_Indices[i]);
+	}	
+	for (int i = 0; i < sizeof(Right_eyebrow_Indices) / sizeof(Right_eyebrow_Indices[0]); i++)
+	{
+		unsigned int Indice = right_eyebrow_Indices[2 * i];
+		objl::Vector3 Position = positions[Indice];
+		unsigned int FIndice = right_eyebrow_Indices[2 * i + 1];
+		objl::Vector2 Feature = objl::Vector2(Position.X, Position.Y) - NoseFeature;
+		Right_eyebrow_Indices[i] = Verticle(Position, Indice, Feature, FIndice);
+		StandardFeaturePosiotons.push_back(Right_eyebrow_Indices[i]);
+	}	
+	for (int i = 0; i < sizeof(Mouth_Indices) / sizeof(Mouth_Indices[0]); i++)
+	{
+		unsigned int Indice = mouth_Indices[2 * i];
+		objl::Vector3 Position = positions[Indice];
+		unsigned int FIndice = mouth_Indices[2 * i + 1];
+		objl::Vector2 Feature = objl::Vector2(Position.X, Position.Y) - NoseFeature;
+		Mouth_Indices[i] = Verticle(Position, Indice, Feature, FIndice);
+		StandardFeaturePosiotons.push_back(Mouth_Indices[i]);
+	}	
+	for (int i = 0; i < sizeof(Nose_Indices) / sizeof(Nose_Indices[0]); i++)
+	{
+		unsigned int Indice = nose_Indices[2 * i];
+		objl::Vector3 Position = positions[Indice];
+		unsigned int FIndice = nose_Indices[2 * i + 1];
+		objl::Vector2 Feature = objl::Vector2(Position.X, Position.Y) - NoseFeature;
+		Nose_Indices[i] = Verticle(Position, Indice, Feature, FIndice);
+		StandardFeaturePosiotons.push_back(Nose_Indices[i]);
+	}
+
+	// 对特征点排序
+	for (int i = 0; i < StandardFeaturePosiotons.size() - 1; i++)
+	{
+		for (int j = 0; j < StandardFeaturePosiotons.size() - i - 1; j++)
+		{
+			if (StandardFeaturePosiotons[j].Indice > StandardFeaturePosiotons[j + 1].Indice)
+			{
+				swap(StandardFeaturePosiotons[j], StandardFeaturePosiotons[j + 1]);
+			}
+		}
+	}
+}
+
+std::vector<Verticle> FeatureOut(FaceShapeData faceShapeData)
+{
+	std::vector<Verticle> Out;
+	double StandardLength = 0;
+	double OutLength = 0;
+	objl::Vector2 NoseF_(faceShapeData.data.face_shape_list[0].nose[0].X, faceShapeData.data.face_shape_list[0].nose[0].Y);
+
+	for (int i = 0; i < sizeof(Face_profile_Indices) / sizeof(Face_profile_Indices[0]); i++)
+	{
+		unsigned int Indice = Face_profile_Indices[i].Indice;
+		unsigned int FIndice = Face_profile_Indices[i].FIndice;
+		objl::Vector3 Position = objl::Vector3(faceShapeData.data.face_shape_list[0].face_profile[FIndice].X, faceShapeData.data.face_shape_list[0].face_profile[FIndice].Y, Face_profile_Indices[i].Position.Z);
+		objl::Vector2 Feature = objl::Vector2(Position.X, Position.Y) - NoseF_;
+		Out.push_back(Verticle(Position, Indice, Feature, FIndice));
+		StandardLength += Face_profile_Indices[i].Feature.magnitude();
+		OutLength += Feature.magnitude();
+	}
+	for (int i = 0; i < sizeof(Left_eye_Indices) / sizeof(Left_eye_Indices[0]); i++)
+	{
+		unsigned int Indice = Left_eye_Indices[i].Indice;
+		unsigned int FIndice = Left_eye_Indices[i].FIndice;
+		objl::Vector3 Position = objl::Vector3(faceShapeData.data.face_shape_list[0].left_eye[FIndice].X, faceShapeData.data.face_shape_list[0].left_eye[FIndice].Y, Left_eye_Indices[i].Position.Z);
+		objl::Vector2 Feature = objl::Vector2(Position.X, Position.Y) - NoseF_;
+		Out.push_back(Verticle(Position, Indice, Feature, FIndice));
+		StandardLength += Face_profile_Indices[i].Feature.magnitude();
+		OutLength += Feature.magnitude();
+	}
+	for (int i = 0; i < sizeof(Right_eye_Indices) / sizeof(Right_eye_Indices[0]); i++)
+	{
+		unsigned int Indice = Right_eye_Indices[i].Indice;
+		unsigned int FIndice = Right_eye_Indices[i].FIndice;
+		objl::Vector3 Position = objl::Vector3(faceShapeData.data.face_shape_list[0].right_eye[FIndice].X, faceShapeData.data.face_shape_list[0].right_eye[FIndice].Y, Right_eye_Indices[i].Position.Z);
+		objl::Vector2 Feature = objl::Vector2(Position.X, Position.Y) - NoseF_;
+		Out.push_back(Verticle(Position, Indice, Feature, FIndice));
+		StandardLength += Face_profile_Indices[i].Feature.magnitude();
+		OutLength += Feature.magnitude();
+	}
+	for (int i = 0; i < sizeof(Left_eyebrow_Indices) / sizeof(Left_eyebrow_Indices[0]); i++)
+	{
+		unsigned int Indice = Left_eyebrow_Indices[i].Indice;
+		unsigned int FIndice = Left_eyebrow_Indices[i].FIndice;
+		objl::Vector3 Position = objl::Vector3(faceShapeData.data.face_shape_list[0].left_eyebrow[FIndice].X, faceShapeData.data.face_shape_list[0].left_eyebrow[FIndice].Y, Left_eyebrow_Indices[i].Position.Z);
+		objl::Vector2 Feature = objl::Vector2(Position.X, Position.Y) - NoseF_;
+		Out.push_back(Verticle(Position, Indice, Feature, FIndice));
+		StandardLength += Face_profile_Indices[i].Feature.magnitude();
+		OutLength += Feature.magnitude();
+	}
+	for (int i = 0; i < sizeof(Right_eyebrow_Indices) / sizeof(Right_eyebrow_Indices[0]); i++)
+	{
+		unsigned int Indice = Right_eyebrow_Indices[i].Indice;
+		unsigned int FIndice = Right_eyebrow_Indices[i].FIndice;
+		objl::Vector3 Position = objl::Vector3(faceShapeData.data.face_shape_list[0].right_eyebrow[FIndice].X, faceShapeData.data.face_shape_list[0].right_eyebrow[FIndice].Y, Right_eyebrow_Indices[i].Position.Z);
+		objl::Vector2 Feature = objl::Vector2(Position.X, Position.Y) - NoseF_;
+		Out.push_back(Verticle(Position, Indice, Feature, FIndice));
+		StandardLength += Face_profile_Indices[i].Feature.magnitude();
+		OutLength += Feature.magnitude();
+	}
+	for (int i = 0; i < sizeof(Mouth_Indices) / sizeof(Mouth_Indices[0]); i++)
+	{
+		unsigned int Indice = Mouth_Indices[i].Indice;
+		unsigned int FIndice = Mouth_Indices[i].FIndice;
+		objl::Vector3 Position = objl::Vector3(faceShapeData.data.face_shape_list[0].mouth[FIndice].X, faceShapeData.data.face_shape_list[0].mouth[FIndice].Y, Mouth_Indices[i].Position.Z);
+		objl::Vector2 Feature = objl::Vector2(Position.X, Position.Y) - NoseF_;
+		Out.push_back(Verticle(Position, Indice, Feature, FIndice));
+		StandardLength += Face_profile_Indices[i].Feature.magnitude();
+		OutLength += Feature.magnitude();
+	}
+	for (int i = 0; i < sizeof(Nose_Indices) / sizeof(Nose_Indices[0]); i++)
+	{
+		unsigned int Indice = Nose_Indices[i].Indice;
+		unsigned int FIndice = Nose_Indices[i].FIndice;
+		objl::Vector3 Position = objl::Vector3(faceShapeData.data.face_shape_list[0].nose[FIndice].X, faceShapeData.data.face_shape_list[0].nose[FIndice].Y, Nose_Indices[i].Position.Z);
+		objl::Vector2 Feature = objl::Vector2(Position.X, Position.Y) - NoseF_;
+		Out.push_back(Verticle(Position, Indice, Feature, FIndice));
+		StandardLength += Face_profile_Indices[i].Feature.magnitude();
+		OutLength += Feature.magnitude();
+	}
+
+	Zchange = OutLength / StandardLength;
+	cout << "模型轴形变比例 = " << Zchange << endl;
+
+	for (int i = 0; i < Out.size() - 1; i++)
+	{
+		for (int j = 0; j < Out.size() - i - 1; j++)
+		{
+			if (Out[j].Indice > Out[j + 1].Indice)
+			{
+				swap(Out[j], Out[j + 1]);
+				swap(StandardFeaturePosiotons[j], StandardFeaturePosiotons[j + 1]);
+			}
+		}
+	}
+
+	return Out;
+}
+
+void RadialBasisFunction(std::vector<Verticle> FeatureData)
+{
+	std::vector<Verticle>::iterator it = FeatureData.begin();
+
+	for (int i = 0; i < OutModelPositions.size(); i++)
+	{
+		// 这个点是 OutModelPositions[i],在未变换前与标准模型对应点相同
+		//cout << FeatureData.end()->Indice << endl;
+
+		// 如果该点是特征点
+		if (i == it->Indice)
+		{
+			OutModelPositions[i] = it->Position;
+			if(it != (FeatureData.end()-1))
+				it++;
+		}
+		// 该点不是特征点
+		else 
+		{
+			objl::Vector3 Move = objl:: Vector3();
+			for (int j = 0; j < FeatureData.size(); j++) 
+			{
+				double r = (FeatureData[j].Position - OutModelPositions[i]).magnitude();
+				objl::Vector3 Dir = FeatureData[j].Position - StandardFeaturePosiotons[j].Position;
+				//cout << r << endl;
+				//objl::Vector3 delta = Dir * exp(-r * r / R);
+				objl::Vector3 delta = Dir * exp(-r * r / R);
+				//cout << delta.X << "," << delta.Y << "," << delta.Z << "___";
+				Move = Move + delta;
+			}
+		}
+	}
 }
