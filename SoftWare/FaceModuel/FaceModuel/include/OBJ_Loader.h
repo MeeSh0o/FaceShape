@@ -34,11 +34,11 @@ namespace objl
 		// Default Constructor
 		Vector2()
 		{
-			X = 0.0f;
-			Y = 0.0f;
+			X = 0.0;
+			Y = 0.0;
 		}
 		// Variable Set Constructor
-		Vector2(float X_, float Y_)
+		Vector2(double X_, double Y_)
 		{
 			X = X_;
 			Y = Y_;
@@ -64,9 +64,16 @@ namespace objl
 			return Vector2(this->X - right.X, this->Y - right.Y);
 		}
 		// Float Multiplication Operator Overload
-		Vector2 operator*(const float& other) const
+		Vector2 operator*(const double& other) const
 		{
 			return Vector2(this->X *other, this->Y * other);
+		}
+		// +=
+		Vector2& operator += (const Vector2& src)
+		{
+			X += src.X;
+			Y += src.Y;
+			return *this;
 		}
 		double magnitude()
 		{
@@ -75,8 +82,8 @@ namespace objl
 		}
 
 		// Positional Variables
-		float X;
-		float Y;
+		double X;
+		double Y;
 	};
 
 	// Structure: Vector3
@@ -87,12 +94,12 @@ namespace objl
 		// Default Constructor
 		Vector3()
 		{
-			X = 0.0f;
-			Y = 0.0f;
-			Z = 0.0f;
+			X = 0.0;
+			Y = 0.0;
+			Z = 0.0;
 		}
 		// Variable Set Constructor
-		Vector3(float X_, float Y_, float Z_)
+		Vector3(double X_, double Y_, double Z_)
 		{
 			X = X_;
 			Y = Y_;
@@ -119,27 +126,69 @@ namespace objl
 			return Vector3(this->X - right.X, this->Y - right.Y, this->Z - right.Z);
 		}
 		// Float Multiplication Operator Overload
-		Vector3 operator*(const float& other) const
+		Vector3 operator*(const double& other) const
 		{
 			return Vector3(this->X * other, this->Y * other, this->Z * other);
 		}
 		// Float Division Operator Overload
-		Vector3 operator/(const float& other) const
+		Vector3 operator/(const double& other) const
 		{
 			return Vector3(this->X / other, this->Y / other, this->Z / other);
 		}
+		// *=
+		Vector3 &operator *= (const double src)
+		{ 
+			X *= src; 
+			Y *= src; 
+			Z *= src;  
+			return *this; 
+		}
+		// +=
+		Vector3 &operator += (const Vector3& src) 
+		{
+			X += src.X; 
+			Y += src.Y;
+			Z += src.Z; 
+			return *this; 
+		}
+		// -
+		Vector3 operator - () const { return Vector3(-X, -Y, -Z); }
+
+
+		// 模长
 		double magnitude() 
 		{
 			double value = sqrt(X * X + Y * Y + Z * Z);
 			return value;
 		}
+		// 单位向量
+		Vector3 normalize() {
+			return Vector3(X / magnitude(), Y / magnitude(), Z / magnitude());
+		}
+
 
 		// Positional Variables
-		float X;
-		float Y;
-		float Z;
+		double X;
+		double Y;
+		double Z;
 	};
 
+	// 点乘
+	inline double dot(const Vector3& a, const Vector3& b)
+	{
+		return a.X* b.X + a.Y * b.Y + a.Z * b.Z;
+	}
+	// 叉乘
+	inline Vector3 cross(const Vector3& a, const Vector3& b)
+	{
+		return Vector3(a.Y * b.Z - a.Z * b.Y, a.Z * b.X - a.X * b.Z, a.X * b.Y - a.Y * b.X);
+	}
+	// 左乘
+	inline Vector3 operator * (const double src, const Vector3& v)
+	{ 
+		Vector3 tmp(v); 
+		return (tmp *= src); 
+	}
 	// Structure: Vertex
 	//
 	// Description: Model Vertex object that holds
@@ -240,21 +289,21 @@ namespace objl
 		}
 
 		// Vector3 Magnitude Calculation
-		float MagnitudeV3(const Vector3 in)
+		double MagnitudeV3(const Vector3 in)
 		{
-			return (sqrtf(powf(in.X, 2) + powf(in.Y, 2) + powf(in.Z, 2)));
+			return double(sqrt(powf(in.X, 2) + powf(in.Y, 2) + powf(in.Z, 2)));
 		}
 
 		// Vector3 DotProduct
-		float DotV3(const Vector3 a, const Vector3 b)
+		double DotV3(const Vector3 a, const Vector3 b)
 		{
 			return (a.X * b.X) + (a.Y * b.Y) + (a.Z * b.Z);
 		}
 
 		// Angle between 2 Vector3 Objects
-		float AngleBetweenV3(const Vector3 a, const Vector3 b)
+		double AngleBetweenV3(const Vector3 a, const Vector3 b)
 		{
-			float angle = DotV3(a, b);
+			double angle = DotV3(a, b);
 			angle /= (MagnitudeV3(a) * MagnitudeV3(b));
 			return angle = acosf(angle);
 		}
