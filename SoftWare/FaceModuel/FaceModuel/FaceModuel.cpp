@@ -347,6 +347,10 @@ int main()
 	std::vector <objl::Vector3> P_3 = Align(P_2, faceShapeData); // 将输出结果对齐回原来的比例
 
 	// 写成最简单的obj文件看看
+	if (0 != _access(Filepath.c_str(), 0))
+	{
+		_mkdir(Filepath.c_str());   // 返回 0 表示创建成功，-1 表示失败
+	}
 	WriteObj(P_3, faceShapeData, Filepath, fileName);
 	WriteMtl(Filepath, fileName);
 }
