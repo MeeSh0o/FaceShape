@@ -2,7 +2,7 @@ newmtl 1
 	Ns 400
 	d 1
 	illum 2
-	Kd 0.784314 0.784314 0.784314
+	Kd 1 1 1
 	Ks 0.0 0.0 0.0
 	Ka 0.2 0.2 0.2
 	map_Kd 1.JPG

@@ -317,11 +317,12 @@ float StandardXY = 0; // 模型整体形变系数，控制Z轴坐标变化
 
 int main()
 {
-	LoadObj(TreeDRestruntion_path); // 初始化标准模型数据
-
 	string fileName; // 文件名
 	std::cout << "输入文件名：" << endl;
-	cin >> fileName;
+	cin >> fileName;	
+	
+	clock_t start_time = clock();
+
 	vector<string> v;
 	SplitString(fileName, v, ".");
 	string Filepath = faces_path + "\\" + v[0]; // 输出文件路径
@@ -332,11 +333,13 @@ int main()
 	char* path_char = new char[99];
 	path_char = const_cast<char*>(path);
 
+	LoadObj(TreeDRestruntion_path); // 初始化标准模型数据
+
 	string data_str = FaceShape_Python(path_char); // str格式的json数据
 
 	FaceShapeData faceShapeData = Json2Class(data_str); // FaceShapeData数据
 
-	ShowImage(path_char, faceShapeData); // 传入faceShapeData，输出图像并标点
+	//ShowImage(path_char, faceShapeData); // 传入faceShapeData，输出图像并标点
 
 	std::vector<VertexF> F_ = FeatureOut(faceShapeData); // 获得目标模型的特征点的模型顶点数据
 
@@ -353,6 +356,10 @@ int main()
 	}
 	WriteObj(P_3, faceShapeData, Filepath, fileName);
 	WriteMtl(Filepath, fileName);
+
+	clock_t end_time = clock();
+	cout << "Running time is: " << static_cast<double>(end_time - start_time) / CLOCKS_PER_SEC * 1000 << "ms" << endl;//输出运行时间
+	return 0;
 }
 
 
@@ -1316,7 +1323,7 @@ void WriteMtl(string path, string name) {
 	if (file) {
 		cout << "开始写入" << OutMtl << endl;
 
-		file << "newmtl " << v[0] << "\n" << "\tNs 400\n\td 1\n\tillum 2\n\tKd 0.784314 0.784314 0.784314\n\tKs 0.0 0.0 0.0\n\tKa 0.2 0.2 0.2\n\tmap_Kd " + name;
+		file << "newmtl " << v[0] << "\n" << "\tNs 400\n\td 1\n\tillum 2\n\tKd 1 1 1\n\tKs 0.0 0.0 0.0\n\tKa 0.2 0.2 0.2\n\tmap_Kd " + name;
 
 		cout << "写入完成" << endl;
 		file.close();
