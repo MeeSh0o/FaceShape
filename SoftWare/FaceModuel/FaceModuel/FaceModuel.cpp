@@ -103,7 +103,7 @@ std::vector <objl::Vector2> RadialBasisFunction2D(std::vector<VertexF> FeatureDa
 // 解线性方程组2D
 MatrixXd Calc_tps2D(std::vector< VertexF > control_points, double regularization = 0.0);
 // 输出OBj文件
-void WriteObj(std::vector <objl::Vector3> OutModelPositions, FaceShapeData faceShapeData,string path, string name);
+void WriteObj(std::vector <objl::Vector3> OutModelPositions, FaceShapeData faceShapeData, string path, string name);
 void WriteObj(std::vector<objl::Vector2> OutModelPositions);
 // 输出mtl文件
 void WriteMtl(string path, string name);
@@ -115,6 +115,8 @@ vector<objl::Vector3> Align(std::vector <objl::Vector2> Q_, FaceShapeData faceSh
 void SplitString(const string& s, vector<string>& v, const string& c);
 // 计算法向量
 std::vector <objl::Vector3> CaculateNormal(std::vector <objl::Vector3> P);
+// 显示模型
+void ShowModule();
 
 /*变量声明*/
 
@@ -300,8 +302,6 @@ FeaturePoint nose_Indices[13]{
 	FeaturePoint(3.75229,24.0425,676,12),
 };
 
-
-
 string path = "F:\\Graduation Project\\SoftWare\\FaceShape_Tencent\\FaceShape";
 string ImagePath = "F:\\Graduation Project\\SoftWare\\FaceModuel\\FaceModuel\\Images\\";
 string chdir_cmd = string("sys.path.append(\"") + path + "\")";
@@ -312,15 +312,16 @@ const char* cstr_cmd = chdir_cmd.c_str();
 
 float StandardXY = 0; // 模型整体形变系数，控制Z轴坐标变化
 
-
 /*主函数*/
 
 int main()
 {
+	LoadObj(TreeDRestruntion_path); // 初始化标准模型数据
+
 	string fileName; // 文件名
 	std::cout << "输入文件名：" << endl;
-	cin >> fileName;	
-	
+	cin >> fileName;
+
 	clock_t start_time = clock();
 
 	vector<string> v;
@@ -333,13 +334,12 @@ int main()
 	char* path_char = new char[99];
 	path_char = const_cast<char*>(path);
 
-	LoadObj(TreeDRestruntion_path); // 初始化标准模型数据
 
 	string data_str = FaceShape_Python(path_char); // str格式的json数据
 
 	FaceShapeData faceShapeData = Json2Class(data_str); // FaceShapeData数据
 
-	//ShowImage(path_char, faceShapeData); // 传入faceShapeData，输出图像并标点
+	ShowImage(path_char, faceShapeData); // 传入faceShapeData，输出图像并标点
 
 	std::vector<VertexF> F_ = FeatureOut(faceShapeData); // 获得目标模型的特征点的模型顶点数据
 
@@ -349,7 +349,8 @@ int main()
 
 	std::vector <objl::Vector3> P_3 = Align(P_2, faceShapeData); // 将输出结果对齐回原来的比例
 
-	// 写成最简单的obj文件看看
+	ShowModule(); // 输出模型图像
+
 	if (0 != _access(Filepath.c_str(), 0))
 	{
 		_mkdir(Filepath.c_str());   // 返回 0 表示创建成功，-1 表示失败
@@ -359,9 +360,9 @@ int main()
 
 	clock_t end_time = clock();
 	cout << "Running time is: " << static_cast<double>(end_time - start_time) / CLOCKS_PER_SEC * 1000 << "ms" << endl;//输出运行时间
+
 	return 0;
 }
-
 
 /*数据结构定义*/
 
@@ -1063,7 +1064,7 @@ static double thin_plate_splines(double r)
 MatrixXd Calc_tps2D(std::vector< VertexF > F_, double regularization)
 {
 	unsigned int p = unsigned int(F_.size());
-	
+
 	// 配置矩阵和向量
 	MatrixXd mtx_l(p + 3, p + 3);
 	MatrixXd mtx_v(p + 3, 2);
@@ -1207,20 +1208,20 @@ vector<objl::Vector3> Align(std::vector <objl::Vector2> Q_, FaceShapeData faceSh
 	double HalfFaceHM = (Q_[Nose_Indices[1].Indice] - Q_[Face_profile_Indices[7].Indice]).magnitude();
 	double FaceWS = (objl::Vector2(Face_profile_Indices[0].Position.X, Face_profile_Indices[0].Position.Y) - objl::Vector2(Face_profile_Indices[14].Position.X, Face_profile_Indices[14].Position.Y)).magnitude();
 	double HalfFaceHS = (objl::Vector2(Nose_Indices[1].Position.X, Nose_Indices[1].Position.Y) - objl::Vector2(Face_profile_Indices[7].Position.X, Face_profile_Indices[7].Position.Y)).magnitude();
-	cout << "FaceWP"<< FaceWP <<endl;
-	cout << "HalfFaceHP"<< HalfFaceHP <<endl;
-	cout << "FaceWM"<< FaceWM <<endl;
-	cout << "HalfFaceHM"<< HalfFaceHM <<endl;
-	cout << "FaceWS"<< FaceWS <<endl;
-	cout << "HalfFaceHS"<< HalfFaceHS <<endl;
+	cout << "FaceWP" << FaceWP << endl;
+	cout << "HalfFaceHP" << HalfFaceHP << endl;
+	cout << "FaceWM" << FaceWM << endl;
+	cout << "HalfFaceHM" << HalfFaceHM << endl;
+	cout << "FaceWS" << FaceWS << endl;
+	cout << "HalfFaceHS" << HalfFaceHS << endl;
 
 	// 脸的长宽比例   图片/模型 
 	double WScale = FaceWP / FaceWM;
 	double HScale = HalfFaceHP / HalfFaceHM;
 	double SPScale = (FaceWP / FaceWS + HalfFaceHP / HalfFaceHS) / 2;
-	cout << "WScale"<< WScale <<endl;
-	cout << "HScale"<< HScale <<endl;
-	cout << "SPScale"<< SPScale <<endl;
+	cout << "WScale" << WScale << endl;
+	cout << "HScale" << HScale << endl;
+	cout << "SPScale" << SPScale << endl;
 
 	for (int i = 0; i < Q_.size(); i++) {
 		Q_[i].X = (Q_[i].X - NoseM.X) * WScale + NoseP.X;
@@ -1231,14 +1232,14 @@ vector<objl::Vector3> Align(std::vector <objl::Vector2> Q_, FaceShapeData faceSh
 	return Q;
 }
 
-void WriteObj(std::vector <objl::Vector3> OutModelPositions, FaceShapeData faceShapeData,string path, string name)
+void WriteObj(std::vector <objl::Vector3> OutModelPositions, FaceShapeData faceShapeData, string path, string name)
 {
 	vector<string> v;
 	SplitString(name, v, ".");
 
 	int imageW = faceShapeData.data.image_width;
 	int imageH = faceShapeData.data.image_height;
-	
+
 	//string OutObj = "F:\\Graduation Project\\Faces\\3D_Restruntion.obj";
 	string OutObj = path + "/" + v[0] + ".obj";
 	ofstream file(OutObj);
@@ -1252,7 +1253,7 @@ void WriteObj(std::vector <objl::Vector3> OutModelPositions, FaceShapeData faceS
 		file << "#" << OutModelPositions.size() << "Vertices" << endl;
 		for (int i = 0; i < OutModelPositions.size(); i++) {
 			//cout << OutModelPositions[i].X << "," << OutModelPositions[i].Y << "," << OutModelPositions[i].Z << endl;
-			file <<"v " << OutModelPositions[i].X << " " << OutModelPositions[i].Y << " " << -OutModelPositions[i].Z << endl;
+			file << "v " << OutModelPositions[i].X << " " << OutModelPositions[i].Y << " " << -OutModelPositions[i].Z << endl;
 		}
 		// 材质索引
 		file << "#" << OutModelPositions.size() << "Texture Coordinates" << endl;
@@ -1276,9 +1277,9 @@ void WriteObj(std::vector <objl::Vector3> OutModelPositions, FaceShapeData faceS
 			int x = int(StandardModelFaces[j].X);
 			int y = int(StandardModelFaces[j].Y);
 			int z = int(StandardModelFaces[j].Z);
-			file << "f " << x << "/" << x << "/" << x				
-				<< " " << y << "/" << y << "/" << y	
-				<< " " << z << "/" << z << "/" << z	
+			file << "f " << x << "/" << x << "/" << x
+				<< " " << y << "/" << y << "/" << y
+				<< " " << z << "/" << z << "/" << z
 				<< endl;
 		}
 		cout << "写入完成" << endl;
@@ -1304,7 +1305,7 @@ void WriteObj(vector<objl::Vector2> OutModelPositions)
 			int x = int(StandardModelFaces[j].X);
 			int y = int(StandardModelFaces[j].X);
 			int z = int(StandardModelFaces[j].X);
-			file << "f " << x << "/" 
+			file << "f " << x << "/"
 				<< " " << y
 				<< " " << z << endl;
 		}
@@ -1333,7 +1334,7 @@ void WriteMtl(string path, string name) {
 	}
 }
 
-void SplitString(const string& s, vector<string>& v, const string& c)
+void SplitString(const string & s, vector<string> & v, const string & c)
 {
 	string::size_type pos1, pos2;
 	pos2 = s.find(c);
@@ -1372,7 +1373,7 @@ std::vector <objl::Vector3> CaculateNormal(std::vector <objl::Vector3> P) {
 		PNormal[cindice] += objl::cross(Pc - Pa, Pc - Pb);
 		Pcount[cindice]++;
 	}
-	
+
 	for (int i = 0; i < PNormal.size(); i++) {
 		if (Pcount[i] > 0) {
 			PNormal[i] = PNormal[i] / Pcount[i];
@@ -1382,4 +1383,11 @@ std::vector <objl::Vector3> CaculateNormal(std::vector <objl::Vector3> P) {
 	}
 
 	return PNormal;
+}
+
+void ShowModule() {
+	Mat green_img(Size(900, 900), CV_8UC3, Scalar(0, 255, 0));
+	namedWindow("green image", CV_WINDOW_AUTOSIZE | CV_WINDOW_FREERATIO);
+	imshow("green image", green_img);
+	waitKey(0);
 }
